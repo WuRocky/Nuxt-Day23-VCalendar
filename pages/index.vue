@@ -1,41 +1,79 @@
 <script setup>
-/*
-起始日期 => 當前日期
-結束日期 => 下一天
-日期格式需要是  YYYY-MM-DD
+import { useScreens } from "vue-screen-utils";
+
+const generateLocaleDateRange = () => {
+  const currentDate = new Date();
+
+  const startDate = currentDate.toLocaleDateString().replaceAll("/", "-");
+
+  // currentDate 的下一天
+  let endDate = new Date(currentDate);
+  endDate.setDate(currentDate.getDate() + 1);
+  endDate = endDate.toLocaleDateString().replaceAll("/", "-");
+
+  // 明年的同一天
+  const nextYear = new Date(currentDate).setFullYear(
+    currentDate.getFullYear() + 1
+  );
+
+  return {
+    startDate,
+    endDate,
+    nextYear,
+  };
+};
+
+const { startDate, endDate, nextYear } = generateLocaleDateRange();
 
 const date = ref({
-  start: ..., 
-  end: ...,
+  start: startDate,
+  end: endDate,
 });
-*/
 
-/*
-調整日期的格式
+const minDate = new Date(startDate);
+const maxDate = new Date(nextYear);
 const masks = {
- ...
+  title: "YYYY 年 MM 月",
+  modelValue: "YYYY-MM-DD",
 };
-*/
 
-/*
-  使用  vue-screen-utils 套件調整響應式設定
+const { mapCurrent } = useScreens({
+  md: "768px",
+});
 
-  const rows = mapCurrent( ... );
-*/
+const rows = mapCurrent({ md: 1 }, 2);
+const columns = mapCurrent({ md: 2 }, 1);
+const expanded = mapCurrent({ md: false }, true);
+const titlePosition = mapCurrent({ md: "center" }, "left");
 </script>
 
 <template>
   <div class="container mt-5 date-picker">
     <ClientOnly>
-      <!-- 加入 DatePicker 實作日期選取的功能  -->
-      <!-- <DatePicker v-model.range.string="date"  /> -->
+      <DatePicker
+        v-model.range.string="date"
+        color="primary"
+        :masks="masks"
+        :first-day-of-week="1"
+        :min-date="minDate"
+        :max-date="maxDate"
+        :rows="rows"
+        :columns="columns"
+        :expanded="expanded"
+        :title-position="titlePosition"
+        class="border-0"
+      />
     </ClientOnly>
   </div>
 </template>
 
 <style lang="scss" scoped>
 .date-picker {
-  // 使用 CSS 變數覆蓋 VCalendar 套件的預設樣式
+  :deep(.vc-primary) {
+    --vc-accent-200: #ff6b6b;
+    --vc-accent-600: #c11717;
+    --vc-accent-700: #ad3131;
+  }
 
   :deep(.vc-title) {
     background: none;
